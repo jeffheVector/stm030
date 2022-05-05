@@ -9,7 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "port_sys.h"
-#ifdef HDEP_GATHER
+#ifndef MOTOR485
 #define USE_HORIZONTAL 0  //设置横屏或者竖屏显示 0或1为竖屏 2或3为横屏
 
 #if USE_HORIZONTAL==0||USE_HORIZONTAL==1

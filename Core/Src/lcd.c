@@ -2,7 +2,7 @@
 #include "main.h"
 #include "lcdfont.h"
 #include "port_sys.h"
-#ifdef HDEP_GATHER
+#ifndef MOTOR485
 SPI_HandleTypeDef lcdspi;
 static void Hardware_SPI_Init(void)
 {

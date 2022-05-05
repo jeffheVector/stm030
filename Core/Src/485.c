@@ -4,6 +4,7 @@
 #include "myque.h"
 #include "myarray.h"
 #include "utils.h"
+#include "mylist.h"
 //#include "lcd.h"
 //#include "lcdfont.h"
 UART_HandleTypeDef huart1;
@@ -21,7 +22,8 @@ static _myque *p485Que;
 
 u8 localSubAddr=0x80;
 static u8 Ack485Buff[8]={0x80,0x05,0x00,0x00,0x00,0x00,0x00};
-static CALLBACK_485 Callback485Array[MAX485CMD_NUM];
+//static CALLBACK_485 Callback485Array[MAX485CMD_NUM];
+static _mylist *p485CmdList;
 static void MX_USART1_UART_Init(u32 baudrate)
 {
 
@@ -64,15 +66,19 @@ static void Init485EN(void)
 }
 
 
-void Register485Callback(u8 cmd,CALLBACK_485 callback)
+void Register485Callback(u8 subAddr,u8 cmd,CALLBACK_485 callback)
 {
 	if(cmd>=MAX485CMD_NUM)
 	{
 		Error_Handler(ERRORCODE_REGISTER485CALLBACK);
 		return;
 	}
-
-	Callback485Array[cmd]=callback;
+	_485_func_callback p485cb;//=AppMalloc(sizeof(_485_func_callback));
+	p485cb.addr=subAddr;
+	p485cb.cmd=cmd;
+	p485cb.callback=callback;
+	MyList_AddNodePureData(p485CmdList,&p485cb,sizeof(_485_func_callback));
+	//Callback485Array[cmd]=callback;
 }
 
 void Make485Data(u8 *dataPackage,u8 funcCode,u8 *data)
@@ -104,11 +110,8 @@ void Init485(u8 localAddr,u32 baudrate)
 	MX_USART1_UART_Init(baudrate);
 	Init485EN();
 	HAL_UART_Receive_IT(&huart1,rcv485DataBuffer,rcv485BufferLen);
-	for(u16 i=0;i<MAX485CMD_NUM;i++)
-	{
-		Callback485Array[i]=NULL;
-	}
-	Register485Callback(CMD485_SETDEBUGLOG,Callback_DealSetDebugLog);
+	p485CmdList=MyList_Create();
+	//Register485Callback(localAddr, CMD485_SETDEBUGLOG,Callback_DealSetDebugLog);
 	#ifdef DEBUG
 	#ifdef HDEP_GATHER
 	PRINTF("HDEP 485ADDR:%d,BAUDRATE:%d\r\n",localAddr,baudrate);
@@ -175,6 +178,32 @@ static void Timer_Deal485Data(void)
 	
 }
 
+static bool IsDealSubAddr(u8 subAddr)
+{
+	for(int i=0;i<p485CmdList->count;i++)
+	{
+		_485_func_callback *p485cb=MyList_GetNode(p485CmdList,i);
+		if(p485cb->addr==subAddr)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+static CALLBACK_485 Find485DealCallback(u8 subAddr,u8 cmd)
+{
+	for(int i=0;i<p485CmdList->count;i++)
+	{
+		_485_func_callback *p485cb=MyList_GetNode(p485CmdList,i);
+		if(p485cb->addr==subAddr && p485cb->cmd==cmd)
+		{
+			return p485cb->callback;
+		}
+	}
+	return NULL;
+}
+
 void Task_Deal485(void)
 {
 //	testcount++;
@@ -213,7 +242,7 @@ void Task_Deal485(void)
 		//PRINTF("485SIZE:%d\r\n",p485Que->size);
 		u8 *pFirstByte=MyQue_DataAt(p485Que,0);
 		//if(pFirstByte
-		if(*pFirstByte==localSubAddr)
+		if(IsDealSubAddr(*pFirstByte))//==localSubAddr)
 		{
 			//如果第一个是本机地址，尝试处理
 			if(MyQue_Size(p485Que)>=MAX485PKG_LEN)
@@ -227,9 +256,10 @@ void Task_Deal485(void)
 					u8 crcCode2=crcCode&0xFF;
 					if(crcCode1==recvBuff[MAX485PKG_LEN-2] && crcCode2==recvBuff[MAX485PKG_LEN-1])
 					{
-						if(Callback485Array[recvBuff[1]]!=NULL)
+						CALLBACK_485 callback=Find485DealCallback(*pFirstByte,recvBuff[1]);
+						if(callback!=NULL)
 						{
-							Callback485Array[recvBuff[1]](recvBuff);
+							callback(recvBuff);
 						}
 						//已经处理一个完整包，从缓冲区删除
 						MyQue_Remove(p485Que,MAX485PKG_LEN,NULL);

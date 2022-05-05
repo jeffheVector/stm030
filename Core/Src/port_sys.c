@@ -669,8 +669,7 @@ bool DebugLogBy485=false;
 void PRINTF(char *info,...)
 {
 	#ifndef DEBUG
-	if(!DebugLogBy485)
-		return;
+	return;
 	#endif
 	va_list ap;
     int logLength = 0U;//, result = 0U;

@@ -8,7 +8,7 @@
 
   The Embedded Experts
 */
-#ifdef HDEP_GATHER
+#ifndef MOTOR485
 #include "lcdfont.h"
 u8 __align(64) hdep_logo[] __attribute__((at(0x08006000)))={
 //unsigned char hdep_logo[4680UL + 1] = {

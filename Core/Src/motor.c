@@ -147,9 +147,9 @@ static void Timer_DealLimit1(void);
 static void Timer_DealLimit2(void);
 void Motor_Init(void)
 {
-	Register485Callback(MOTORCMD485_STARTMOTOR,Callback_StartMotor);
-	Register485Callback(MOTORCMD485_STOPMOTOR,Callback_StopMotor);
-	Register485Callback(MOTORCMD485_QUERYMOTORINFO,Callback_QueryMotor);
+	Register485Callback(localSubAddr,MOTORCMD485_STARTMOTOR,Callback_StartMotor);
+	Register485Callback(localSubAddr,MOTORCMD485_STOPMOTOR,Callback_StopMotor);
+	Register485Callback(localSubAddr,MOTORCMD485_QUERYMOTORINFO,Callback_QueryMotor);
 	PWM_Init();
 	motorInfos[0].highState=MOTORLIMIT_IDLE;
 	motorInfos[0].lowState=MOTORLIMIT_IDLE;

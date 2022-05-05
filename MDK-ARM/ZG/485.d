@@ -40,3 +40,4 @@ zg\485.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 zg\485.o: ../Core/Inc/myque.h
 zg\485.o: ../Core/Inc/myarray.h
 zg\485.o: ../Core/Inc/utils.h
+zg\485.o: ../Core/Inc/mylist.h
