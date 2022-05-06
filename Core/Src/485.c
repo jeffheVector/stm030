@@ -240,7 +240,7 @@ void Task_Deal485(void)
 //	}
 	while(!MyQue_IsEmpty(p485Que))
 	{
-		if(MyQue_Size(p485Que)<=6)
+		if(MyQue_Size(p485Que)<=4)
 		{
 			continue;
 		}
