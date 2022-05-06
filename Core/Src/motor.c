@@ -39,7 +39,7 @@ static void SetMotorStop(u8 motorIndex)
 
 static void ReportMotorInfo(void *pData)
 {
-	Send485(pData,MAX485PKG_LEN);
+	Send485(pData,MOTOR485CMD_LEN);
 	AppFree(pData);
 }
 
@@ -95,7 +95,7 @@ static void Callback_StartMotor(u8 *data)
 			}
 		}
 	}
-	u8 *pDataPackage=AppMalloc(MAX485PKG_LEN);
+	u8 *pDataPackage=AppMalloc(MOTOR485CMD_LEN);
 	Make485Data(pDataPackage,MOTORCMD485_REPORTSTARTMOTOR,resultInfo);
 	//Make485Data(pDataPackage,MOTORCMD485_REPORTSTARTMOTOR,motorIndex,resultInfo);
 	GWTaskTimer_SetAttachTimer(1,true,pDataPackage,ReportMotorInfo);
@@ -121,7 +121,7 @@ static void Callback_StopMotor(u8 *data)
 		SetMotorStop(motorIndex);
 		
 	}
-	u8 *pDataPackage=AppMalloc(MAX485PKG_LEN);
+	u8 *pDataPackage=AppMalloc(MOTOR485CMD_LEN);
 	Make485Data(pDataPackage,MOTORCMD485_REPORTSTOPMOTOR,resultInfo);
 	GWTaskTimer_SetAttachTimer(0,true,pDataPackage,ReportMotorInfo);
 //	u8 *pDataPackage=AppMalloc(MAX485PKG_LEN);
@@ -139,7 +139,7 @@ static void Callback_QueryMotor(u8 *data)
 	resultInfo[2]=motorInfos[motorIndex].highState;
 	resultInfo[3]=motorInfos[motorIndex].lowState;
 	
-	u8 *pDataPackage=AppMalloc(MAX485PKG_LEN);
+	u8 *pDataPackage=AppMalloc(MOTOR485CMD_LEN);
 	Make485Data(pDataPackage,MOTORCMD485_REPORTMOTORINFO,resultInfo);
 	GWTaskTimer_SetAttachTimer(1,true,pDataPackage,ReportMotorInfo);
 }
@@ -147,9 +147,9 @@ static void Timer_DealLimit1(void);
 static void Timer_DealLimit2(void);
 void Motor_Init(void)
 {
-	Register485Callback(localSubAddr,MOTORCMD485_STARTMOTOR,Callback_StartMotor);
-	Register485Callback(localSubAddr,MOTORCMD485_STOPMOTOR,Callback_StopMotor);
-	Register485Callback(localSubAddr,MOTORCMD485_QUERYMOTORINFO,Callback_QueryMotor);
+	Register485Callback(localSubAddr,MOTORCMD485_STARTMOTOR,MOTOR485CMD_LEN,Callback_StartMotor);
+	Register485Callback(localSubAddr,MOTORCMD485_STOPMOTOR,MOTOR485CMD_LEN,Callback_StopMotor);
+	Register485Callback(localSubAddr,MOTORCMD485_QUERYMOTORINFO,MOTOR485CMD_LEN,Callback_QueryMotor);
 	PWM_Init();
 	motorInfos[0].highState=MOTORLIMIT_IDLE;
 	motorInfos[0].lowState=MOTORLIMIT_IDLE;

@@ -1,6 +1,5 @@
 zg\pwm.o: ..\Core\Src\pwm.c
 zg\pwm.o: ../Core/Inc/pwm.h
-zg\pwm.o: ../Core/Inc/motor.h
 zg\pwm.o: ../Core/Inc/port_sys.h
 zg\pwm.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h
 zg\pwm.o: ../Core/Inc/stm32f0xx_hal_conf.h
@@ -37,5 +36,6 @@ zg\pwm.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 zg\pwm.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 zg\pwm.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 zg\pwm.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+zg\pwm.o: ../Core/Inc/motor.h
 zg\pwm.o: ../Core/Inc/485.h
 zg\pwm.o: ../Core/Inc/gwtask_timer.h

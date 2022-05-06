@@ -188,7 +188,7 @@ static void Callback_SetABMN(u8 *data)
 }
 static void AMBN_Port_Init(void)
 {
-	Register485Callback(localSubAddr, HDEPCMD485_ABMN,Callback_SetABMN);
+	Register485Callback(localSubAddr, HDEPCMD485_ABMN,8,Callback_SetABMN);
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 
 	__HAL_RCC_GPIOA_CLK_ENABLE();	 //使能B端口时钟

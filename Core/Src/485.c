@@ -66,7 +66,7 @@ static void Init485EN(void)
 }
 
 
-void Register485Callback(u8 subAddr,u8 cmd,CALLBACK_485 callback)
+void Register485Callback(u8 subAddr,u8 cmd,u8 cmdLen,CALLBACK_485 callback)
 {
 	if(cmd>=MAX485CMD_NUM)
 	{
@@ -76,6 +76,7 @@ void Register485Callback(u8 subAddr,u8 cmd,CALLBACK_485 callback)
 	_485_func_callback p485cb;//=AppMalloc(sizeof(_485_func_callback));
 	p485cb.addr=subAddr;
 	p485cb.cmd=cmd;
+	p485cb.cmdLen=cmdLen;
 	p485cb.callback=callback;
 	MyList_AddNodePureData(p485CmdList,&p485cb,sizeof(_485_func_callback));
 	//Callback485Array[cmd]=callback;
@@ -178,31 +179,31 @@ static void Timer_Deal485Data(void)
 	
 }
 
-static bool IsDealSubAddr(u8 subAddr)
-{
-	for(int i=0;i<p485CmdList->count;i++)
-	{
-		_485_func_callback *p485cb=MyList_GetNode(p485CmdList,i);
-		if(p485cb->addr==subAddr)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-static CALLBACK_485 Find485DealCallback(u8 subAddr,u8 cmd)
+static _485_func_callback *Find485DealCallback(u8 subAddr,u8 cmd)
 {
 	for(int i=0;i<p485CmdList->count;i++)
 	{
 		_485_func_callback *p485cb=MyList_GetNode(p485CmdList,i);
 		if(p485cb->addr==subAddr && p485cb->cmd==cmd)
 		{
-			return p485cb->callback;
+			return p485cb;
 		}
 	}
 	return NULL;
 }
+
+//static CALLBACK_485 Find485DealCallback(u8 subAddr,u8 cmd)
+//{
+//	for(int i=0;i<p485CmdList->count;i++)
+//	{
+//		_485_func_callback *p485cb=MyList_GetNode(p485CmdList,i);
+//		if(p485cb->addr==subAddr && p485cb->cmd==cmd)
+//		{
+//			return p485cb->callback;
+//		}
+//	}
+//	return NULL;
+//}
 
 void Task_Deal485(void)
 {
@@ -239,30 +240,37 @@ void Task_Deal485(void)
 //	}
 	while(!MyQue_IsEmpty(p485Que))
 	{
+		if(MyQue_Size(p485Que)<=6)
+		{
+			continue;
+		}
+		
 		//PRINTF("485SIZE:%d\r\n",p485Que->size);
 		u8 *pFirstByte=MyQue_DataAt(p485Que,0);
+		u8 *pFunCode=MyQue_DataAt(p485Que,1);
+		_485_func_callback *p485cb=Find485DealCallback(*pFirstByte,*pFunCode);
 		//if(pFirstByte
-		if(IsDealSubAddr(*pFirstByte))//==localSubAddr)
+		if(p485cb!=NULL)//IsDealSubAddr(*pFirstByte))//==localSubAddr)
 		{
 			//如果第一个是本机地址，尝试处理
-			if(MyQue_Size(p485Que)>=MAX485PKG_LEN)
+			if(MyQue_Size(p485Que)>=p485cb->cmdLen)
 			{
 				u8 recvBuff[16];
-				if(MyQue_TryGet(p485Que,recvBuff,MAX485PKG_LEN))
+				if(MyQue_TryGet(p485Que,recvBuff,p485cb->cmdLen))
 				{
 					//尝试处理这几个字节
-					u16 crcCode=GetQuickCRC16(recvBuff,MAX485PKG_LEN-2);
+					u16 crcCode=GetQuickCRC16(recvBuff,p485cb->cmdLen-2);
 					u8 crcCode1=crcCode>>8;
 					u8 crcCode2=crcCode&0xFF;
-					if(crcCode1==recvBuff[MAX485PKG_LEN-2] && crcCode2==recvBuff[MAX485PKG_LEN-1])
+					if(crcCode1==recvBuff[p485cb->cmdLen-2] && crcCode2==recvBuff[p485cb->cmdLen-1])
 					{
-						CALLBACK_485 callback=Find485DealCallback(*pFirstByte,recvBuff[1]);
+						CALLBACK_485 callback=p485cb->callback;// Find485DealCallback(*pFirstByte,recvBuff[1]);
 						if(callback!=NULL)
 						{
 							callback(recvBuff);
 						}
 						//已经处理一个完整包，从缓冲区删除
-						MyQue_Remove(p485Que,MAX485PKG_LEN,NULL);
+						MyQue_Remove(p485Que,p485cb->cmdLen,NULL);
 					}
 					else
 					{

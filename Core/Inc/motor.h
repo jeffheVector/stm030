@@ -35,7 +35,7 @@ typedef struct
 	_limit_statenums lowStateNums;
 	u8 lowState;
 }_motor_info;
-
+#define MOTOR485CMD_LEN 8
 #define MAXMOTOR_NUM 2
 #define MOTORCMD485_STARTMOTOR 0X01 //0xFE 0x01 0x00 0x01 0x01 0x02 CRC1 CRC2//启动1号闸门，正转（1，2反转），启动时长2秒钟
 #define MOTORCMD485_REPORTSTARTMOTOR 0X02

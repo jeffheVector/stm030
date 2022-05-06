@@ -36,6 +36,6 @@ zg\stm32f0xx_it.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 zg\stm32f0xx_it.o: ../Core/Inc/stm32f0xx_it.h
 zg\stm32f0xx_it.o: ../Core/Inc/systick.h
 zg\stm32f0xx_it.o: ../Core/Inc/pwm.h
-zg\stm32f0xx_it.o: ../Core/Inc/485.h
 zg\stm32f0xx_it.o: ../Core/Inc/port_sys.h
 zg\stm32f0xx_it.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+zg\stm32f0xx_it.o: ../Core/Inc/485.h

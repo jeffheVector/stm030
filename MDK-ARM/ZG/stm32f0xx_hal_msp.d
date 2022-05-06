@@ -37,4 +37,3 @@ zg\stm32f0xx_hal_msp.o: ../Core/Inc/485.h
 zg\stm32f0xx_hal_msp.o: ../Core/Inc/port_sys.h
 zg\stm32f0xx_hal_msp.o: ../Core/Inc/systick.h
 zg\stm32f0xx_hal_msp.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
-zg\stm32f0xx_hal_msp.o: ../Core/Inc/lcd.h
